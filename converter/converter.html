@@ -1,0 +1,336 @@
+﻿<html>
+	<head>
+		<meta name="viewport"content="width=device-width">
+		<title>Convert Image to Pdf</title>
+		<style>
+			body{
+				background:#000;
+				align-items:center;
+				flex-direction:column;
+				justify-content:flex-column;
+				display:flex;
+			}
+		.conv-container{
+			width:500px;
+			position:relative;
+			top:10%;
+			background:#444;
+			overflow:hidden;
+			border-radius:15px;
+		}
+		.conv-container .conv-body{
+			display:table;
+			width:100%;
+			padding:10px;
+			position:relative;
+			align-items:center;
+			justify-content:center;
+		}
+		.conv-container .conv-body .canvas-container{
+			overflow:auto;
+			width:100%;
+			position:relative;
+			height:400px;
+		}
+		.conv-container .conv-body #cs{
+			width:95%;
+			position:absolute;
+		}
+		.conv-container .conv-body #download{
+			width:95%;
+			border:2px solid black;
+			background:#000!important;
+			color:#ddd;
+			padding:10px;
+			outline:none;
+			border-radius:10px;
+			letter-spacing:2px;
+			font:bold 17px Arial;
+		}
+		.conv-container .conv-body #download::disabled{
+			background:red;
+		}
+		.conv-container .conv-body #name,#size,#type{
+			color:gold!important;
+			font:lighter 15px Arial!important;
+			
+		}
+		.conv-container .conv-body p{
+			color:#ddd;
+			font:bold 15px verdana;
+		}
+	
+		.conv-container .conv-body .select{
+			float:;
+			top:0px;
+		}
+	
+		 .conv-pop{
+		 	top:0;
+			width:100%;
+			height:100%;
+			background:rgba(0,0,0,0.7);
+			z-index:1;
+			position:fixed;
+			display:flex;
+			flex-direction:column;
+			align-item:center;
+			opacity:0;
+			visibility:hidden;
+			justify-content:center;
+		}
+		 .conv-pop.active{
+		 	visibility:visible;
+		 	opacity:1;
+		 }
+		
+		 .conv-pop .content.active{
+		 	top:10%;
+		   visibility:visible;
+		 	z-index:100;
+		 	user-select:none
+		 	pointer-events:auto;
+		 	opacity:1;
+		 }
+		 .conv-pop .content{
+		 	width:95%;
+		 	margin:5px;
+		 	padding:10px;
+		 	background:#fff;
+		 	border-radius:10px;
+		 	position:relative;
+		 	top:0%;
+		 	transition:0.5s;
+		 }
+		 .conv-pop .content p{
+		 	font:400 18px Arial;
+		 }
+		 .conv-pop .content input{
+		 	width:70%;
+		 	padding:10px;
+		 	border:none;
+		 	border-bottom:1px solid #777;
+		 	background:none;
+		 	font:300 18px Arial;
+		 	outline:none;
+		 	display:inline-block;
+		 	margin:10px;
+		 }
+		 .conv-pop .content input::placeholder{
+		 	font:400 18px Arial;
+		 }
+		 .conv-pop .content button{
+		 	width:100px;
+		 	padding:5px;
+		 	border:2px solid #777;
+		 	background:#000;
+		 	color:#ddd;
+		 	font:700 17px Arial;
+		 	outline:none;
+		 	border-radius:10px;
+		 	
+		 }
+		 .conv-pop .content button:last-child{
+		 	float:right!important;
+		 }
+		 @keyframes zoom{
+		 	0%{ 
+				opacity:0;
+		 		}
+		 	100%{ 
+				opacity:1;
+		 	 }
+		 }
+		.done{
+			top:0;
+			width:100%;
+			height:100%;
+			background:rgba(0,0,0,0.67);
+			z-index:1;
+			position:fixed;
+			display:flex;
+			flex-direction:column;
+			align-item:center;
+			justify-content:center;
+			opacity:0;
+			visibility:hidden;
+		}
+		.done.active{
+			opacity:1;
+			visibility:visible;
+		}
+		.done .done-content{
+			text-align:center;
+			position:relative;
+			top:70%;
+			background:#eee;
+			color:#000;
+			padding:10px;
+			font:500 19px Arial;
+			margin:30px;
+			border-radius:15px;
+			z-index:5;
+			transition:0.5s;
+			opacity:0;
+			visibility:hidden;
+		}
+		.done .done-content.active{
+			top:20%;
+			opacity:1;
+			visibility:visible;
+		}
+	#txt-error{
+		font:500 15px Arial;
+		color:red;
+		display:block;
+	}
+		</style>
+	</head>
+	<body>
+	
+		<div class="conv-pop"id="pop">
+			<div class="content">
+			<p>Save As</p>
+			<i id="txt-error"></i>
+				<input type="text" id="n-txt"placeholder="Enter file name">.pdf
+				<br>
+				<button id="save">Save </button>
+				<button id="cancel">Cancel </button>
+			</div>
+		</div>
+		
+		<div class="done">
+			<div class="done-content">
+				<p>Process complete</p>
+			</div>
+		</div>
+		
+		<div class="conv-container">
+			<div class="conv-body">
+		<br>
+		<input type="file"accept="image/*"id="demo"/>
+		<br>
+		<div class="props">
+		<p><b>Filename :</b>&nbsp;<i id="name"></i></p>
+		<p><b>Filetype :</b>&nbsp;<i id="type"></i></p>
+		<p><b>Filesize :</b>&nbsp;<i id="size"></i></p>
+		</div>
+		
+		<hr>
+		
+	
+		<div class="file-type"></div>
+		<br>
+		<div class="canvas-container">
+			<canvas id="cs"></canvas>
+		</div>
+		<br>
+		<br>
+		<button id="download">Convert</button>
+		</div>
+	</div>
+		<script src="jquery-1.9.1.min.js"></script>
+		<script type="text/javascript" src="jspdf.min.js"></script>
+		<script type="text/javascript" src="html2canvas.min.js"></script>
+		<script>
+			(function($){
+				function _(el){ return document.querySelector(el); }
+				var canvas = _("#cs");
+				var context = canvas.getContext("2d");
+				var picStore = [];
+				function getFileInfo(file){
+					_("#name").textContent = file.name;
+					fileType = _("#type").textContent = file.type;
+					_("#size").textContent = (file.size /(1000)).toFixed(2)+"KB";
+				}
+		
+			_("#demo").onchange = function(e){
+				getFileInfo(e.currentTarget.files[0]);
+				var reader = new FileReader();
+				reader.onload = function(e){
+					var image = new Image();
+					
+				image.onload = function(){
+					canvas.width = image.width;
+					canvas.height = image.height;
+					context.drawImage(image,0,0,image.width,image.height);
+					}
+					
+					//picStore.push();
+				//picStore.forEach(function(item,index){
+					image.src = e.target.result;
+					//});
+				}
+				reader.readAsDataURL(this.files[0]);
+			}
+			
+			//Convert image to pdf
+		_("#download").onclick = function(){
+			_("#pop").classList.add("active");
+			_(".container").classList.add("active");
+		}
+		
+		
+			_("#cancel").onclick = function(){
+				_("#pop").classList.remove("active");
+				_(".container").classList.remove("active");
+			}
+			var filename = '';
+			var fileType = '';
+			
+		_("#n-txt").oninput = function(){
+				filename = this.value;
+			}
+	_("#save").onclick = function(){
+		
+		html2canvas(canvas,{
+				onrendered:function(canvas){
+					var imageData = canvas.toDataURL(fileType);
+					var doc = new jsPDF("p","mm");
+			switch(fileType){
+				case 'image/jpeg':
+				doc.addImage(imageData,'JPEG',10,10);
+				break;
+				
+				case 'image/png':
+				doc.addImage(imageData,'PNG',10,10);
+				break;
+				
+				default:
+				alert("File extension unknown");
+				break;
+			}
+					//alert(filename);
+				switch(filename){
+					case '':
+				_("#n-txt").style.borderBottom = '1px solid red';
+				_("#n-txt").style.color = 'red';
+				_("#txt-error").textContent = "Filename can't be empty";
+					break;
+					
+					default:
+				_("#n-txt").style.borderBottom = '1px solid #333';
+				_("#n-txt").style.color = 'black';
+				_("#txt-error").textContent = "";
+					//Pop Done
+				doc.save(filename+".pdf");
+				_(".done").classList.add("active");
+				_(".done-content").classList.add("active");
+				
+			var id = setInterval(function(){
+				_(".done").classList.remove("active");
+				_(".done-content").classList.remove("active");
+			},3200);
+				//$("#n-txt").prop("value","");
+				_("#pop").classList.remove("active");
+				_(".container").classList.remove("active");
+					break;
+				}
+			
+		  }
+	   });
+	}
+})(jQuery);
+		</script>
+	</body>
+</html>
